@@ -7,14 +7,24 @@ import {
   hasFollowingParagraph,
 } from './collect-body.ts'
 import { applyMetaToLatex, getHead } from './collect-meta.ts'
+import { m } from '@unified-latex/unified-latex-builder'
+
+export interface RehypeUnifiedLatexOptions {
+  documentClass?: 'article' | 'report' | 'book'
+}
 
 export type HastNode = HastContent | HastRoot
 
 export function unifiedHastToLatex() {
-  return (tree: HastRoot) => convertHastToLatexAst(tree)
+  return (tree: HastRoot) => rehypeUnifiedLatex(tree)
 }
 
-export function convertHastToLatexAst(tree: HastRoot): Latex.Root {
+export function rehypeUnifiedLatex(
+  tree: HastRoot,
+  options: RehypeUnifiedLatexOptions = {
+    documentClass: 'book',
+  }
+): Latex.Root {
   const head = getHead(tree)
   const body = getBody(tree)
 
@@ -37,43 +47,11 @@ export function convertHastToLatexAst(tree: HastRoot): Latex.Root {
   }
 
   // wrap in begin{document} ... end{document}
-  content.unshift({
-    type: 'macro',
-    content: 'begin',
-    args: [
-      {
-        type: 'argument',
-        content: [{ type: 'string', content: 'document' }],
-        openMark: '{',
-        closeMark: '}',
-      },
-    ],
-  })
-  content.push({
-    type: 'macro',
-    content: 'end',
-    args: [
-      {
-        type: 'argument',
-        content: [{ type: 'string', content: 'document' }],
-        openMark: '{',
-        closeMark: '}',
-      },
-    ],
-  })
+  content.unshift(m('begin', 'document'))
+  content.push(m('end', 'document'))
+
   // add appropriate document meta
-  content.unshift({
-    type: 'macro',
-    content: 'documentclass',
-    args: [
-      {
-        type: 'argument',
-        content: [{ type: 'string', content: 'book' }],
-        openMark: '{',
-        closeMark: '}',
-      },
-    ],
-  })
+  content.unshift(m('documentclass', options.documentClass ?? 'book'))
 
   const root = applyMetaToLatex(tree, { type: 'root', content })
 

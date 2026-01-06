@@ -1,18 +1,31 @@
 {
-  "name": "bookbinding",
-  "version": "0.0.0",
-  "private": true,
+  "name": "rehype-unified-latex",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "html-to-hast": "node ./lib/transformers/html-to-hast.ts"
+    "example": "node ./example.ts"
   },
+  "author": {
+    "name": "Evan Hennessy",
+    "url": "https://www.hennessyevan.com"
+  },
+  "keywords": [
+    "unist",
+    "ast",
+    "latex",
+    "rehype",
+    "unified",
+    "hast",
+    "transformer"
+  ],
   "engines": {
     "node": ">=22.18.0"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "packageManager": "pnpm@10.22.0",
   "dependencies": {
     "@unified-latex/unified-latex": "^1.8.3",
+    "@unified-latex/unified-latex-builder": "^1.8.3",
     "@unified-latex/unified-latex-lint": "^1.8.3",
     "@unified-latex/unified-latex-to-hast": "^1.8.3",
     "@unified-latex/unified-latex-types": "^1.8.0",
@@ -24,6 +37,11 @@
     "rehype-parse": "^9.0.1",
     "tiny-invariant": "^1.3.3",
     "unified": "^11.0.5",
-    "unist-util-inspect": "^8.1.0"
+    "unist-util-inspect": "^8.1.0",
+    "unist-util-remove": "^4.0.0",
+    "unist-util-visit": "^5.0.0"
+  },
+  "devDependencies": {
+    "tsdown": "0.19.0-beta.3"
   }
 }

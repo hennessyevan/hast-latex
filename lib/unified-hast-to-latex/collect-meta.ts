@@ -1,5 +1,6 @@
 import type { Root as HastRoot, Element } from 'hast'
 import * as Latex from '@unified-latex/unified-latex-types'
+import { arg, args, m } from '@unified-latex/unified-latex-builder'
 
 export function getHead(tree: HastRoot): Element | undefined {
   const html = tree.children.find(
@@ -25,7 +26,9 @@ export function applyMetaToLatex(
     return latexAst
   }
 
-  const metaNodes: Latex.Node[] = []
+  const metaNodes: Latex.Node[] = [
+    m('usepackage', args(['T1', 'fontenc'], { braces: '[]{}' })),
+  ]
 
   for (const child of head.children) {
     if (child.type === 'element' && child.tagName === 'meta') {
@@ -33,32 +36,10 @@ export function applyMetaToLatex(
       const contentAttr = child.properties?.content
 
       if (typeof nameAttr === 'string' && typeof contentAttr === 'string') {
-        if (nameAttr.toLowerCase() === 'author') {
-          metaNodes.push({
-            type: 'macro',
-            content: 'author',
-            args: [
-              {
-                type: 'argument',
-                content: [{ type: 'string', content: contentAttr }],
-                openMark: '{',
-                closeMark: '}',
-              },
-            ],
-          })
-        } else if (nameAttr.toLowerCase() === 'title') {
-          metaNodes.push({
-            type: 'macro',
-            content: 'title',
-            args: [
-              {
-                type: 'argument',
-                content: [{ type: 'string', content: contentAttr }],
-                openMark: '{',
-                closeMark: '}',
-              },
-            ],
-          })
+        if (['author', 'dc.creator'].includes(nameAttr.toLowerCase())) {
+          metaNodes.push(m('author', contentAttr))
+        } else if (['title', 'dc.title'].includes(nameAttr.toLowerCase())) {
+          metaNodes.push(m('title', contentAttr))
         }
       }
     }
