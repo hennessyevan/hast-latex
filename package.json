@@ -12,6 +12,9 @@
     "name": "Evan Hennessy",
     "url": "https://www.hennessyevan.com"
   },
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "unist",
     "ast",
