@@ -1,6 +1,6 @@
-import type { Root as HastRoot, Element } from 'hast'
+import { args, m } from '@unified-latex/unified-latex-builder'
 import * as Latex from '@unified-latex/unified-latex-types'
-import { arg, args, m } from '@unified-latex/unified-latex-builder'
+import type { Element, Root as HastRoot } from 'hast'
 
 export function getHead(tree: HastRoot): Element | undefined {
   const html = tree.children.find(

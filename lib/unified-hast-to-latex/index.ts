@@ -1,7 +1,7 @@
 import { m } from '@unified-latex/unified-latex-builder'
 import * as Latex from '@unified-latex/unified-latex-types'
 import type { Content as HastContent, Root as HastRoot } from 'hast'
-import type { Plugin, Transformer } from 'unified'
+import type { Plugin } from 'unified'
 import {
   getBody,
   hasFollowingParagraph,
@@ -9,7 +9,6 @@ import {
   isParagraph,
 } from './collect-body.ts'
 import { applyMetaToLatex, getHead } from './collect-meta.ts'
-import type { VFile } from 'vfile'
 
 export interface RehypeUnifiedLatexOptions {
   documentClass?: 'article' | 'report' | 'book'
