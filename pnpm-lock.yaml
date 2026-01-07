@@ -35,6 +35,9 @@ importers:
       '@unified-latex/unified-latex-util-to-string':
         specifier: ^1.8.3
         version: 1.8.3
+      hast-util-class-list:
+        specifier: ^2.0.1
+        version: 2.0.1
       hast-util-from-html:
         specifier: ^2.0.3
         version: 2.0.3
@@ -44,6 +47,9 @@ importers:
       hast-util-to-string:
         specifier: ^3.0.1
         version: 3.0.1
+      prettier-plugin-latex:
+        specifier: ^2.0.1
+        version: 2.0.1
       rehype-parse:
         specifier: ^9.0.1
         version: 9.0.1
@@ -59,6 +65,9 @@ importers:
       unist-util-remove:
         specifier: ^4.0.0
         version: 4.0.0
+      unist-util-select:
+        specifier: ^5.1.0
+        version: 5.1.0
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -236,6 +245,10 @@ packages:
 
   '@unified-latex/unified-latex-prettier@1.8.3':
     resolution: {integrity: sha512-sat9VSBJQriX/biqAD+gBG2OkVy1mXMdqn4vy323es3RyBU9IHxl43dVR8QGXRhbD6lMRABxWdxfj0lRG6KU9g==}
+
+  '@unified-latex/unified-latex-prettier@2.4.2':
+    resolution: {integrity: sha512-gMvlKGiGi9zOWVHXPhzeURhPYwPIJ7MBht42et/sVb4Z2wTjhcn+bU7kookT067ywOptVZNBgJw+iAgSORAd+w==}
+    deprecated: Incorrect version number
 
   '@unified-latex/unified-latex-to-hast@1.8.3':
     resolution: {integrity: sha512-GUNgLmT7vdLAiSv66GzfDGIyaiTXVZ8ocKOQ4L4605wD0IpJtVUatX4JN/qmCcQWQCs+AUWReySRR8pLPvDKRg==}
@@ -416,6 +429,10 @@ packages:
   get-tsconfig@4.13.0:
     resolution: {integrity: sha512-1VKTZJCwBrvbd+Wn3AOgQP/2Av+TfTCOlE4AcRJE72W1ksZXbAx8PPBR9RzgTeSPzlPMHrbANMH3LbltH73wxQ==}
 
+  hast-util-class-list@2.0.1:
+    resolution: {integrity: sha512-revclXEO4oI1La7Js7lmQaqDS/dQ5Wt8W8L8u71adQfCY9Q91DTBA+fuAm3olb6oJeg2eAxf/MYU6vebrEUiXg==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
   hast-util-from-html@2.0.3:
     resolution: {integrity: sha512-CUSRHXyKjzHov8yKsQjGOElXy/3EKpyX56ELnkHH34vDVw1N1XSQ1ZcAvTyAPtGqLTuKP/uxM+aLkSPqF/EtMw==}
 
@@ -509,6 +526,10 @@ packages:
   picomatch@4.0.3:
     resolution: {integrity: sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==}
     engines: {node: '>=12'}
+
+  prettier-plugin-latex@2.0.1:
+    resolution: {integrity: sha512-xIKGN0uWU+JwGHI92ixohngGLpy2nGQhYnmTtVue/jbw+K0fFPddQ3pMXx3fjtmmUhlbZisYXehJtcJ9Ford0g==}
+    engines: {node: '>= 18.0'}
 
   prettier@2.8.8:
     resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
@@ -659,6 +680,9 @@ packages:
 
   unist-util-remove@4.0.0:
     resolution: {integrity: sha512-b4gokeGId57UVRX/eVKej5gXqGlc9+trkORhFJpu9raqZkZhU0zm8Doi05+HaiBsMEIJowL+2WtQ5ItjsngPXg==}
+
+  unist-util-select@5.1.0:
+    resolution: {integrity: sha512-4A5mfokSHG/rNQ4g7gSbdEs+H586xyd24sdJqF1IWamqrLHvYb+DH48fzxowyOhOfK7YSqX+XlCojAyuuyyT2A==}
 
   unist-util-stringify-position@3.0.3:
     resolution: {integrity: sha512-k5GzIBZ/QatR8N5X2y+drfpWG8IDBzdnVj6OInRNWm1oXrzydiaAT2OQiA8DPRRZyAKb9b6I2a6PxYklZD0gKg==}
@@ -890,6 +914,20 @@ snapshots:
       '@unified-latex/unified-latex-util-trim': 1.8.3
       '@unified-latex/unified-latex-util-visit': 1.8.3
       prettier: 3.7.4
+
+  '@unified-latex/unified-latex-prettier@2.4.2':
+    dependencies:
+      '@unified-latex/unified-latex-ctan': 1.8.3
+      '@unified-latex/unified-latex-types': 1.8.0
+      '@unified-latex/unified-latex-util-align': 1.8.1
+      '@unified-latex/unified-latex-util-match': 1.8.0
+      '@unified-latex/unified-latex-util-parse': 1.8.3
+      '@unified-latex/unified-latex-util-pgfkeys': 1.8.1
+      '@unified-latex/unified-latex-util-print-raw': 1.8.0
+      '@unified-latex/unified-latex-util-trim': 1.8.3
+      '@unified-latex/unified-latex-util-visit': 1.8.3
+      prettier: 3.7.4
+      unified: 10.1.2
 
   '@unified-latex/unified-latex-to-hast@1.8.3':
     dependencies:
@@ -1147,6 +1185,8 @@ snapshots:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
+  hast-util-class-list@2.0.1: {}
+
   hast-util-from-html@2.0.3:
     dependencies:
       '@types/hast': 3.0.4
@@ -1301,6 +1341,11 @@ snapshots:
   pathe@2.0.3: {}
 
   picomatch@4.0.3: {}
+
+  prettier-plugin-latex@2.0.1:
+    dependencies:
+      '@unified-latex/unified-latex-prettier': 2.4.2
+      prettier: 3.7.4
 
   prettier@2.8.8: {}
 
@@ -1480,6 +1525,14 @@ snapshots:
       '@types/unist': 3.0.3
       unist-util-is: 6.0.1
       unist-util-visit-parents: 6.0.2
+
+  unist-util-select@5.1.0:
+    dependencies:
+      '@types/unist': 3.0.3
+      css-selector-parser: 3.3.0
+      devlop: 1.1.0
+      nth-check: 2.1.1
+      zwitch: 2.0.4
 
   unist-util-stringify-position@3.0.3:
     dependencies:

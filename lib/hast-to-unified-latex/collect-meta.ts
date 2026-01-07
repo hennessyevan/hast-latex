@@ -1,6 +1,8 @@
 import { args, m } from '@unified-latex/unified-latex-builder'
 import * as Latex from '@unified-latex/unified-latex-types'
 import type { Element, Root as HastRoot } from 'hast'
+import { select } from 'hast-util-select'
+import { insertBeforeNode } from '../utils/insertNodeUtils.ts'
 
 export function getHead(tree: HastRoot): Element | undefined {
   const html = tree.children.find(
@@ -10,20 +12,14 @@ export function getHead(tree: HastRoot): Element | undefined {
 
   if (!html) return undefined
 
-  return html.children.find(
-    (node): node is Element =>
-      node.type === 'element' && node.tagName === 'head'
-  )
+  return select('head', html)
 }
 
-export function applyMetaToLatex(
-  tree: HastRoot,
-  latexAst: Latex.Root
-): Latex.Root {
+export function collectLatexMetaFromHast(tree: HastRoot): Latex.Node[] {
   const head = getHead(tree)
 
   if (!head) {
-    return latexAst
+    return []
   }
 
   const metaNodes: Latex.Node[] = [
@@ -36,29 +32,18 @@ export function applyMetaToLatex(
       const contentAttr = child.properties?.content
 
       if (typeof nameAttr === 'string' && typeof contentAttr === 'string') {
-        if (['author', 'dc.creator'].includes(nameAttr.toLowerCase())) {
+        if (
+          ['author', 'dc.creator', 'og:author'].includes(nameAttr.toLowerCase())
+        ) {
           metaNodes.push(m('author', contentAttr))
-        } else if (['title', 'dc.title'].includes(nameAttr.toLowerCase())) {
+        } else if (
+          ['title', 'dc.title', 'og:title'].includes(nameAttr.toLowerCase())
+        ) {
           metaNodes.push(m('title', contentAttr))
         }
       }
     }
   }
 
-  // Insert meta nodes before \begin{document}
-  const beginDocIndex = latexAst.content.findIndex(
-    (node) =>
-      node.type === 'macro' &&
-      node.content === 'begin' &&
-      node.args?.[0]?.content?.[0]?.type === 'string' &&
-      node.args?.[0]?.content?.[0]?.content === 'document'
-  )
-
-  if (beginDocIndex !== -1) {
-    latexAst.content.splice(beginDocIndex, 0, ...metaNodes)
-  } else {
-    latexAst.content.unshift(...metaNodes)
-  }
-
-  return latexAst
+  return metaNodes
 }

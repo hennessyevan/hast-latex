@@ -8,9 +8,10 @@ import {
   hastNodeToLatex,
   isParagraph,
 } from './collect-body.ts'
-import { applyMetaToLatex, getHead } from './collect-meta.ts'
+import { collectLatexMetaFromHast, getHead } from './collect-meta.ts'
+import { insertBeforeNode } from '../utils/insertNodeUtils.ts'
 
-export interface RehypeUnifiedLatexOptions {
+export interface HastLatexOptions {
   /**
    * The LaTeX document class to use.
    * @default 'book'
@@ -54,8 +55,8 @@ export const DEFAULT_MACRO_REPLACEMENTS: Record<string, string> = {
 
 export type HastNode = HastContent | HastRoot
 
-export const rehypeUnifiedLatex: Plugin<
-  [(RehypeUnifiedLatexOptions | undefined)?],
+export const hastLatex: Plugin<
+  [(HastLatexOptions | undefined)?],
   HastRoot,
   Latex.Root
 > = (
@@ -88,18 +89,19 @@ export const rehypeUnifiedLatex: Plugin<
       }
     }
 
-    // add title page if specified
+    const metaNodes = collectLatexMetaFromHast(tree)
+
     if (options?.makeTitle) content.unshift(m('maketitle'))
 
-    // wrap in begin{document} ... end{document}
-    content.unshift(m('begin', 'document'))
-    content.push(m('end', 'document'))
-
-    // add appropriate document meta
-    content.unshift(m('documentclass', options?.documentClass ?? 'book'))
-
-    const root = applyMetaToLatex(tree, { type: 'root', content })
-
-    return root
+    return {
+      type: 'root',
+      content: [
+        m('documentclass', options?.documentClass ?? 'book'),
+        ...metaNodes,
+        m('begin', 'document'),
+        ...content,
+        m('end', 'document'),
+      ],
+    } satisfies Latex.Root
   }
 }

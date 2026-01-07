@@ -2,14 +2,13 @@ import { m, s, SP } from '@unified-latex/unified-latex-builder'
 import type * as Latex from '@unified-latex/unified-latex-types'
 import type {
   Element,
-  Content as HastContent,
+  RootContent as HastContent,
   Root as HastRoot,
-  Root,
 } from 'hast'
-import { visit } from 'unist-util-visit'
-import { getClassList } from '../utils/getClassList.ts'
-import { type HastNode, type RehypeUnifiedLatexOptions } from './index.ts'
+import getClassList from 'hast-util-class-list'
 import { matches } from 'hast-util-select'
+import { visit } from 'unist-util-visit'
+import { type HastNode, type HastLatexOptions } from './index.ts'
 
 export function getBody(tree: HastRoot): Element | undefined {
   const html = tree.children.find(
@@ -27,7 +26,7 @@ export function getBody(tree: HastRoot): Element | undefined {
 
 export function hastNodeToLatex(
   node: HastNode,
-  options: Pick<RehypeUnifiedLatexOptions, 'macroReplacements'>
+  options: Pick<HastLatexOptions, 'macroReplacements'>
 ): Latex.Node[] {
   if (node.type === 'text') return textToLatexNodes(node.value)
 
@@ -56,7 +55,7 @@ export function hastNodeToLatex(
 
 function isPageNumber(node: Element): boolean {
   const classList = getClassList(node)
-  return classList.includes('page-number') || classList.includes('pagenum')
+  return classList.contains('page-number') || classList.contains('pagenum')
 }
 
 export function hasFollowingParagraph(
@@ -91,7 +90,7 @@ function textToLatexNodes(value: string): Latex.Node[] {
 
 function isChapterBlock(node: Element): boolean {
   const classList = getClassList(node)
-  return classList.includes('chapter') && node.tagName === 'div'
+  return classList.contains('chapter') && node.tagName === 'div'
 }
 
 function convertChapterBlock(node: Element): Latex.Node[] {

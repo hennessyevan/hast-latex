@@ -1,4 +1,4 @@
 export {
-  rehypeUnifiedLatex,
-  type RehypeUnifiedLatexOptions,
-} from './lib/unified-hast-to-latex/index.ts'
+  hastLatex,
+  type HastLatexOptions,
+} from './lib/hast-to-unified-latex/index.ts'

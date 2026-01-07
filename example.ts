@@ -1,12 +1,14 @@
+import { lints } from '@unified-latex/unified-latex-lint'
+import { unifiedLatexStringCompiler } from '@unified-latex/unified-latex-util-to-string'
 import fs from 'fs'
 import path from 'path'
 import rehypeParse from 'rehype-parse'
 import { unified } from 'unified'
-import { rehypeUnifiedLatex } from './lib/unified-hast-to-latex/index.ts'
-import { unifiedLatexStringCompiler } from '@unified-latex/unified-latex-util-to-string'
-import { lints } from '@unified-latex/unified-latex-lint'
 import { remove } from 'unist-util-remove'
-import { isHastElement, isHastText } from './lib/utils/hastUtils.ts'
+import * as prettierPluginLatex from 'prettier-plugin-latex'
+import { format, type Plugin } from 'prettier'
+import { isHastText } from './lib/utils/hastUtils.ts'
+import { hastLatex } from './lib/hast-to-unified-latex/index.ts'
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
@@ -24,7 +26,7 @@ if (!html) {
 
 const processor = unified()
   .use(rehypeParse)
-  .use(rehypeUnifiedLatex, { documentClass: 'book', makeTitle: true })
+  .use(hastLatex, { documentClass: 'book', makeTitle: true })
 
 const hast = processor.parse(html)
 
@@ -44,6 +46,13 @@ const latexProcessor = unified()
 
 const latexString = latexProcessor.stringify(latexAst)
 
+const formattedLatexString = format(latexString as string, {
+  printWidth: 300,
+  useTabs: true,
+  parser: 'latex-parser',
+  plugins: [prettierPluginLatex as Plugin],
+})
+
 // console.log('--- HAST ---')
 // console.dir(hast, { depth: null })
 console.log('--- LaTeX AST ---')
@@ -57,4 +66,4 @@ const outputFilePath = sourceFilePath.replace(/\.html$/i, '.tex')
 
 fs.writeFileSync(outputHast, JSON.stringify(hast, null, 2))
 fs.writeFileSync(outputLatexAst, JSON.stringify(latexAst, null, 2))
-fs.writeFileSync(outputFilePath, latexString)
+fs.writeFileSync(outputFilePath, formattedLatexString)

@@ -1,11 +1,11 @@
-# rehype-unified-latex
+# hast-latex
 
 A small unifiedJS plugin that turns an HTML/HAST tree into a LaTeX AST (see [unified-latex](https://github.com/siefkenj/unified-latex)) so you can render, lint, or emit `.tex` from HTML sources. Designed for book-like documents (ebooks, etc.) where you want headings, chapters, metadata, and inline formatting to map cleanly into LaTeX.
 
 ## Installation
 
 ```bash
-npm install rehype-unified-latex rehype-parse unified @unified-latex/unified-latex-util-to-string
+npm install hast-latex rehype-parse unified @unified-latex/unified-latex-util-to-string
 ```
 
 ## Quick start
@@ -15,7 +15,7 @@ The plugin consumes a HAST tree (e.g., from `rehype-parse`) and returns a unifie
 ```ts
 import { unified } from 'unified'
 import rehypeParse from 'rehype-parse'
-import { rehypeUnifiedLatex } from 'rehype-unified-latex'
+import { hastLatex } from 'hast-latex'
 import { unifiedLatexStringCompiler } from '@unified-latex/unified-latex-util-to-string'
 
 const html = `<html><head><meta name="title" content="Example" /></head><body><h1>Hello</h1><p>World.</p></body></html>`
@@ -23,7 +23,7 @@ const html = `<html><head><meta name="title" content="Example" /></head><body><h
 // Build HAST from HTML
 const rehypeProcessor = unified()
   .use(rehypeParse)
-  .use(rehypeUnifiedLatex, { documentClass: 'book' })
+  .use(hastLatex, { documentClass: 'book' })
 
 const hast = rehypeProcessor.parse(html)
 const latexAst = rehypeProcessor.runSync(hast)
@@ -36,7 +36,7 @@ console.log(latex)
 
 ## API
 
-### `rehypeUnifiedLatex(options?)`
+### `hastLatex(options?)`
 
 Unified plugin that converts HAST → unified-latex AST.
 
@@ -62,7 +62,7 @@ Default `macroReplacements`:
 ```ts
 import { unified } from 'unified'
 import rehypeParse from 'rehype-parse'
-import { rehypeUnifiedLatex } from 'rehype-unified-latex'
+import { hastLatex } from 'hast-latex'
 import { unifiedLatexStringCompiler } from '@unified-latex/unified-latex-util-to-string'
 
 const html = `<!doctype html><html><head>
@@ -75,7 +75,7 @@ const html = `<!doctype html><html><head>
 
 const processor = unified()
   .use(rehypeParse)
-  .use(rehypeUnifiedLatex, {
+  .use(hastLatex, {
     documentClass: 'book',
     makeTitle: true,
     macroReplacements: {
