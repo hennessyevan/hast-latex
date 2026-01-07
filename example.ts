@@ -39,6 +39,7 @@ const latexAst = processor.runSync(hast as any)
 const latexProcessor = unified()
   .use(lints.unifiedLatexLintNoDef)
   .use(lints.unifiedLatexLintObsoletePackages)
+  // @ts-expect-error -- These types are wrong
   .use(unifiedLatexStringCompiler)
 
 const latexString = latexProcessor.stringify(latexAst)
