@@ -11,17 +11,62 @@ import {
 import { applyMetaToLatex, getHead } from './collect-meta.ts'
 
 export interface RehypeUnifiedLatexOptions {
+  /**
+   * The LaTeX document class to use.
+   * @default 'book'
+   */
   documentClass?: 'article' | 'report' | 'book'
+
+  /**
+   * Whether to automatically generate a title page using metadata from the HTML `<head>`.
+   * @default false
+   */
+  makeTitle?: boolean
+
+  /**
+   * A record mapping CSS selectors to LaTeX macro names for inline styling.
+   * #### For example:
+   * - To map b and strong tags to the LaTeX macro "\textbf", use: `{ 'b,strong': 'textbf' }`
+   * - To map divs with class "chapter" to the LaTeX macro "\chapter", use: `{ 'div.chapter': 'chapter' }`
+   *
+   * Uses the `matches` function from `hast-util-select` under the hood.
+   * @see https://unifiedjs.com/explore/package/hast-util-select/#matchesselector-node-space
+   *
+   * @default
+   * ```ts
+   * {
+   *   'b,strong': 'textbf',
+   *   'i,em': 'textit',
+   *   u: 'underline',
+   *   's,strike,del': 'sout',
+   * }
+   * ```
+   */
+  macroReplacements?: Record<string, string>
 }
+
+export const DEFAULT_MACRO_REPLACEMENTS: Record<string, string> = {
+  'b,strong': 'textbf',
+  'i,em': 'textit',
+  u: 'underline',
+  's,strike,del': 'sout',
+} as const
 
 export type HastNode = HastContent | HastRoot
 
 export const rehypeUnifiedLatex: Plugin<
-  [(RehypeUnifiedLatexOptions | null | undefined)?],
+  [(RehypeUnifiedLatexOptions | undefined)?],
   HastRoot,
   Latex.Root
-> = (options = { documentClass: 'book' }) => {
+> = (
+  options = {
+    documentClass: 'book',
+    makeTitle: false,
+    macroReplacements: DEFAULT_MACRO_REPLACEMENTS,
+  }
+) => {
   return (tree) => {
+    const { macroReplacements } = options
     const head = getHead(tree)
     const body = getBody(tree)
 
@@ -31,7 +76,7 @@ export const rehypeUnifiedLatex: Plugin<
 
     for (let i = 0; i < meaningfulChildren.length; i += 1) {
       const child = meaningfulChildren[i]
-      const latexNodes = hastNodeToLatex(child)
+      const latexNodes = hastNodeToLatex(child, { macroReplacements })
 
       content.push(...latexNodes)
 
@@ -42,6 +87,9 @@ export const rehypeUnifiedLatex: Plugin<
         content.push({ type: 'parbreak' })
       }
     }
+
+    // add title page if specified
+    if (options?.makeTitle) content.unshift(m('maketitle'))
 
     // wrap in begin{document} ... end{document}
     content.unshift(m('begin', 'document'))
