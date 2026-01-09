@@ -7,6 +7,7 @@
   "types": "dist/index.d.mts",
   "scripts": {
     "example": "node ./example.ts",
+    "test": "node --test",
     "build": "tsdown ./index.ts",
     "release": "np"
   },
