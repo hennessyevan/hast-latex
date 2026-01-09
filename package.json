@@ -1,7 +1,7 @@
 {
   "name": "hast-latex",
   "description": "Converts HAST to Unified LaTeX AST",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "type": "module",
   "main": "dist/index.mjs",
   "types": "dist/index.d.mts",
