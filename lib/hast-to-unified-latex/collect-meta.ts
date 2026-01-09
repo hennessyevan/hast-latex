@@ -1,49 +1,70 @@
 import { args, m } from '@unified-latex/unified-latex-builder'
+import type * as Hast from 'hast'
 import * as Latex from '@unified-latex/unified-latex-types'
-import type { Element, Root as HastRoot } from 'hast'
 import { select } from 'hast-util-select'
-import { insertBeforeNode } from '../utils/insertNodeUtils.ts'
+import { toString } from 'hast-util-to-string'
+import type { CustomMetaSelector, HastLatexOptions } from './index.ts'
+import { visit } from 'unist-util-visit'
 
-export function getHead(tree: HastRoot): Element | undefined {
-  const html = tree.children.find(
-    (node): node is Element =>
-      node.type === 'element' && node.tagName === 'html'
-  )
+const DEFAULT_META_SELECTORS = {
+  title: 'title,[property="og:title"],[name="title"],[property="dc.title"]',
+  author: '[name="author"],[property="og:author"],[name="dc.creator"]',
+  date: '[name="dc.issued"],[name="date"],[property="og:date"]',
+} as const
 
-  if (!html) return undefined
-
-  return select('head', html)
-}
-
-export function collectLatexMetaFromHast(tree: HastRoot): Latex.Node[] {
-  const head = getHead(tree)
-
-  if (!head) {
-    return []
-  }
+export function collectLatexMetaFromHast(
+  tree: Hast.Root,
+  { customMetaSelectors }: Pick<HastLatexOptions, 'customMetaSelectors'>
+): Latex.Node[] {
+  const metaSelectors = { ...DEFAULT_META_SELECTORS, ...customMetaSelectors }
 
   const metaNodes: Latex.Node[] = [
     m('usepackage', args(['T1', 'fontenc'], { braces: '[]{}' })),
   ]
 
-  for (const child of head.children) {
-    if (child.type === 'element' && child.tagName === 'meta') {
-      const nameAttr = child.properties?.name
-      const contentAttr = child.properties?.content
+  const title = getMetaNode(tree, metaSelectors.title)
+  if (title) metaNodes.push(m('title', getMetaNodeText(title)))
 
-      if (typeof nameAttr === 'string' && typeof contentAttr === 'string') {
-        if (
-          ['author', 'dc.creator', 'og:author'].includes(nameAttr.toLowerCase())
-        ) {
-          metaNodes.push(m('author', contentAttr))
-        } else if (
-          ['title', 'dc.title', 'og:title'].includes(nameAttr.toLowerCase())
-        ) {
-          metaNodes.push(m('title', contentAttr))
-        }
-      }
+  const author = getMetaNode(tree, metaSelectors.author)
+  if (author) metaNodes.push(m('author', getMetaNodeText(author)))
+
+  const date = getMetaNode(tree, metaSelectors.date)
+  if (date) metaNodes.push(m('date', getMetaNodeText(date)))
+
+  return metaNodes
+}
+
+function getMetaNodeText(node: Hast.Nodes | null): string | null {
+  if (!node) return null
+
+  if (node.type === 'element' && node.tagName === 'meta') {
+    const content = node.properties?.content
+    if (typeof content === 'string') {
+      return content.trim() || null
     }
   }
 
-  return metaNodes
+  return toString(node).trim() || null
+}
+
+function getMetaNode(
+  tree: Hast.Root,
+  selector: CustomMetaSelector
+): Hast.Nodes | null {
+  if (typeof selector === 'string') {
+    return select(selector, tree) as Hast.Nodes | null
+  }
+
+  if (typeof selector === 'function') {
+    let foundNode: Hast.Nodes | null = null
+    visit(tree, (node) => {
+      if (selector(node)) {
+        foundNode = node
+      }
+    })
+
+    return foundNode
+  }
+
+  return null
 }

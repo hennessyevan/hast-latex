@@ -1,31 +1,18 @@
 import { m, s, SP } from '@unified-latex/unified-latex-builder'
 import type * as Latex from '@unified-latex/unified-latex-types'
-import type {
-  Element,
-  RootContent as HastContent,
-  Root as HastRoot,
-} from 'hast'
+import type * as Hast from 'hast'
 import getClassList from 'hast-util-class-list'
-import { matches } from 'hast-util-select'
+import { matches, select } from 'hast-util-select'
 import { visit } from 'unist-util-visit'
-import { type HastNode, type HastLatexOptions } from './index.ts'
+import { type HastLatexOptions } from './index.ts'
+import { toString } from 'hast-util-to-string'
 
-export function getBody(tree: HastRoot): Element | undefined {
-  const html = tree.children.find(
-    (node): node is Element =>
-      node.type === 'element' && node.tagName === 'html'
-  )
-
-  if (!html) return undefined
-
-  return html!.children.find(
-    (node): node is Element =>
-      node.type === 'element' && node.tagName === 'body'
-  )
+export function getBody(tree: Hast.Root): Hast.Element | undefined {
+  return select('body', tree) ?? undefined
 }
 
 export function hastNodeToLatex(
-  node: HastNode,
+  node: Hast.Nodes,
   options: Pick<HastLatexOptions, 'macroReplacements'>
 ): Latex.Node[] {
   if (node.type === 'text') return textToLatexNodes(node.value)
@@ -37,7 +24,26 @@ export function hastNodeToLatex(
       return convertChapterBlock(node)
     }
 
-    if (node.tagName === 'p' || node.tagName === 'span') {
+    if (node.tagName === 'ol') {
+      return [m('begin', 'enumerate')]
+    }
+
+    if (node.tagName === 'li') {
+      return [
+        m('item'),
+        ...node.children.flatMap((child) => hastNodeToLatex(child, options)),
+      ]
+    }
+
+    if (node.tagName === 'br') {
+      return [{ type: 'parbreak' }]
+    }
+
+    if (
+      node.tagName === 'div' ||
+      node.tagName === 'p' ||
+      node.tagName === 'span'
+    ) {
       return node.children.flatMap((child) => hastNodeToLatex(child, options))
     }
 
@@ -45,7 +51,7 @@ export function hastNodeToLatex(
       options.macroReplacements || {}
     )) {
       if (matches(selector, node)) {
-        return [m(macroName, flattenText(node.children))]
+        return [m(macroName, toString(node))]
       }
     }
   }
@@ -53,13 +59,13 @@ export function hastNodeToLatex(
   return []
 }
 
-function isPageNumber(node: Element): boolean {
+function isPageNumber(node: Hast.Element): boolean {
   const classList = getClassList(node)
   return classList.contains('page-number') || classList.contains('pagenum')
 }
 
 export function hasFollowingParagraph(
-  nodes: HastContent[],
+  nodes: Hast.Nodes[],
   startIndex: number
 ): boolean {
   for (let i = startIndex; i < nodes.length; i += 1) {
@@ -71,7 +77,7 @@ export function hasFollowingParagraph(
   return false
 }
 
-export function isParagraph(node: HastNode): node is Element {
+export function isParagraph(node: Hast.Nodes): node is Hast.Element {
   return node.type === 'element' && node.tagName === 'p'
 }
 
@@ -88,12 +94,12 @@ function textToLatexNodes(value: string): Latex.Node[] {
   })
 }
 
-function isChapterBlock(node: Element): boolean {
+function isChapterBlock(node: Hast.Element): boolean {
   const classList = getClassList(node)
   return classList.contains('chapter') && node.tagName === 'div'
 }
 
-function convertChapterBlock(node: Element): Latex.Node[] {
+function convertChapterBlock(node: Hast.Element): Latex.Node[] {
   const chapterTitleNodes: string[] = []
 
   visit(node, (node) => {
@@ -129,16 +135,7 @@ function convertChapterBlock(node: Element): Latex.Node[] {
   )
 }
 
-function flattenText(children: HastContent[]): Latex.Node[] {
-  return children.flatMap((child) => {
-    if (child.type === 'text') return textToLatexNodes(child.value)
-
-    if (child.type === 'element') return flattenText(child.children)
-    return []
-  })
-}
-
-export function hasClassList(node: Element): boolean {
+export function hasClassList(node: Hast.Element): boolean {
   const className = node.properties?.className
   return Array.isArray(className)
     ? className.length > 0

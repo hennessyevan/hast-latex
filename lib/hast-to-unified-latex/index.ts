@@ -1,6 +1,6 @@
 import { m } from '@unified-latex/unified-latex-builder'
 import * as Latex from '@unified-latex/unified-latex-types'
-import type { Content as HastContent, Root as HastRoot } from 'hast'
+import * as Hast from 'hast'
 import type { Plugin } from 'unified'
 import {
   getBody,
@@ -8,8 +8,9 @@ import {
   hastNodeToLatex,
   isParagraph,
 } from './collect-body.ts'
-import { collectLatexMetaFromHast, getHead } from './collect-meta.ts'
-import { insertBeforeNode } from '../utils/insertNodeUtils.ts'
+import { collectLatexMetaFromHast } from './collect-meta.ts'
+
+export type CustomMetaSelector = string | ((node: Hast.Node) => Hast.Node)
 
 export interface HastLatexOptions {
   /**
@@ -44,6 +45,14 @@ export interface HastLatexOptions {
    * ```
    */
   macroReplacements?: Record<string, string>
+
+  /**
+   * Overrides the default alorithms for finding certain metadata from the HTML.
+   * This is useful if the HTML uses non-standard tags or attributes for metadata and you know where to find them.
+   *
+   * Can be a CSS selector string or a function that takes a HAST tree and returns a single HAST node.
+   */
+  customMetaSelectors?: Partial<Record<'title' | 'author', CustomMetaSelector>>
 }
 
 export const DEFAULT_MACRO_REPLACEMENTS: Record<string, string> = {
@@ -53,11 +62,9 @@ export const DEFAULT_MACRO_REPLACEMENTS: Record<string, string> = {
   's,strike,del': 'sout',
 } as const
 
-export type HastNode = HastContent | HastRoot
-
 export const hastLatex: Plugin<
   [(HastLatexOptions | undefined)?],
-  HastRoot,
+  Hast.Root,
   Latex.Root
 > = (
   options = {
@@ -67,8 +74,6 @@ export const hastLatex: Plugin<
   }
 ) => {
   return (tree) => {
-    const { macroReplacements } = options
-    const head = getHead(tree)
     const body = getBody(tree)
 
     const content: Latex.Node[] = []
@@ -77,7 +82,7 @@ export const hastLatex: Plugin<
 
     for (let i = 0; i < meaningfulChildren.length; i += 1) {
       const child = meaningfulChildren[i]
-      const latexNodes = hastNodeToLatex(child, { macroReplacements })
+      const latexNodes = hastNodeToLatex(child, options)
 
       content.push(...latexNodes)
 
@@ -89,9 +94,15 @@ export const hastLatex: Plugin<
       }
     }
 
-    const metaNodes = collectLatexMetaFromHast(tree)
+    const metaNodes = collectLatexMetaFromHast(tree, options) ?? []
 
-    if (options?.makeTitle) content.unshift(m('maketitle'))
+    if (
+      options?.makeTitle &&
+      metaNodes.find((n) => n.type === 'macro' && n.content === 'title')
+    ) {
+      content.unshift({ type: 'parbreak' })
+      content.unshift(m('maketitle'))
+    }
 
     return {
       type: 'root',

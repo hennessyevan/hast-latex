@@ -13,6 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": false,
+    "noEmit": true,
     "allowImportingTsExtensions": true
   }
 }
